@@ -5,15 +5,25 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.oscar.citiappdemo.R;
+import com.example.oscar.citiappdemo.presentation.presenter.GetClientNamePresenter;
+
+import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements MainActivityView {
 
     private static ProgressDialog progress;
 
+    @Inject
+    GetClientNamePresenter getClientNamePresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
     }
 
     @Override
@@ -30,5 +40,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         if (progress != null) {
             progress.dismiss();
         }
+    }
+
+    @OnClick(R.id.button)
+    void onButtonClick() {
+        getClientNamePresenter.getClientName();
     }
 }
