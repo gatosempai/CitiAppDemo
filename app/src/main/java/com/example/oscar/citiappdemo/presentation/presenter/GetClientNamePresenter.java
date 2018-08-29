@@ -2,10 +2,11 @@ package com.example.oscar.citiappdemo.presentation.presenter;
 
 import android.support.annotation.NonNull;
 
+import com.example.oscar.citiappdemo.domain.DefaultObserver;
 import com.example.oscar.citiappdemo.domain.GetClientName;
 import com.example.oscar.citiappdemo.presentation.view.MainActivityView;
 
-import io.reactivex.observers.DefaultObserver;
+import javax.inject.Inject;
 
 /**
  * {@link Presenter} that controls communication between views and models of the presentation
@@ -14,41 +15,45 @@ import io.reactivex.observers.DefaultObserver;
 //@PerActivity
 public class GetClientNamePresenter implements Presenter {
 
-  private MainActivityView mainActivityView;
+    private MainActivityView mainActivityView;
 
-  private final GetClientName getUserListUseCase;
+    private final GetClientName getClientNameUseCase;
 
-
-  public void setView(@NonNull MainActivityView view) {
-    this.mainActivityView = view;
-  }
-
-  @Override public void resume() {}
-
-  @Override public void pause() {}
-
-  @Override public void destroy() {
-    this.getUserListUseCase.dispose();
-    this.mainActivityView = null;
-  }
-
-
-  public void getClientName() {
-    this.getUserListUseCase.execute(new GetClientNameObserver(), null);
-  }
-
-  private final class GetClientNameObserver extends DefaultObserver<String> {
-
-    @Override public void onComplete() {
-
+    @Inject
+    public GetClientNamePresenter(GetClientName getClientNameUseCase) {
+        this.getClientNameUseCase = getClientNameUseCase;
     }
 
-    @Override public void onError(Throwable e) {
-
+    public void setView(@NonNull MainActivityView view) {
+        this.mainActivityView = view;
     }
 
-    @Override public void onNext(String initials) {
+    @Override public void resume() {}
 
+    @Override public void pause() {}
+
+    @Override public void destroy() {
+        this.getClientNameUseCase.dispose();
+        this.mainActivityView = null;
     }
-  }
+
+
+    public void getClientName() {
+        this.getClientNameUseCase.execute(new GetClientNameObserver(), null);
+    }
+
+    private final class GetClientNameObserver extends DefaultObserver<String> {
+
+        @Override public void onComplete() {
+            mainActivityView.hideProgress();
+        }
+
+        @Override public void onError(Throwable e) {
+            mainActivityView.showProgress();
+        }
+
+        @Override public void onNext(String initials) {
+            mainActivityView.setClientName(initials);
+        }
+    }
 }

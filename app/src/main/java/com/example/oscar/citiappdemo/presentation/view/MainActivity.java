@@ -3,12 +3,14 @@ package com.example.oscar.citiappdemo.presentation.view;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
 import com.example.oscar.citiappdemo.R;
 import com.example.oscar.citiappdemo.presentation.presenter.GetClientNamePresenter;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -18,6 +20,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     @Inject
     GetClientNamePresenter getClientNamePresenter;
+
+    @BindView(R.id.tv_activity_main) TextView textViewClientName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +46,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         }
     }
 
+    @Override
+    public void setClientName(String clientName) {
+        textViewClientName.setText(clientName);
+    }
+
     @OnClick(R.id.button)
-    void onButtonClick() {
+    public void onButtonClick() {
+        getClientNamePresenter.setView(this);
         getClientNamePresenter.getClientName();
     }
 }
