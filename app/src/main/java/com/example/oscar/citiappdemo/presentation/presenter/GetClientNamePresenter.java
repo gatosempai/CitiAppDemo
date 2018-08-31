@@ -12,15 +12,13 @@ import javax.inject.Inject;
  * {@link Presenter} that controls communication between views and models of the presentation
  * layer.
  */
-//@PerActivity
 public class GetClientNamePresenter implements Presenter {
 
     private MainActivityView mainActivityView;
-
     private final GetClientName getClientNameUseCase;
 
     @Inject
-    public GetClientNamePresenter(GetClientName getClientNameUseCase) {
+    GetClientNamePresenter(GetClientName getClientNameUseCase) {
         this.getClientNameUseCase = getClientNameUseCase;
     }
 
@@ -39,21 +37,23 @@ public class GetClientNamePresenter implements Presenter {
 
 
     public void getClientName() {
-        this.getClientNameUseCase.execute(new GetClientNameObserver(), null);
+        mainActivityView.showProgress();
+        getClientNameUseCase.execute(new GetClientNameObserver(), "111492822");
     }
 
     private final class GetClientNameObserver extends DefaultObserver<String> {
 
-        @Override public void onComplete() {
+        @Override
+        public void onSuccess(String initials) {
+            mainActivityView.setClientName(initials);
             mainActivityView.hideProgress();
         }
 
-        @Override public void onError(Throwable e) {
-            mainActivityView.showProgress();
-        }
 
-        @Override public void onNext(String initials) {
-            mainActivityView.setClientName(initials);
+        @Override
+        public void onError(Throwable e) {
+            mainActivityView.hideProgress();
+            mainActivityView.showError(e.getMessage());
         }
     }
 }

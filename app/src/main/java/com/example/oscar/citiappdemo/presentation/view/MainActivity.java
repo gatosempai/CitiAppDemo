@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.example.oscar.citiappdemo.AndroidApplication;
 import com.example.oscar.citiappdemo.R;
+import com.example.oscar.citiappdemo.presentation.injection.components.ApplicationComponent;
 import com.example.oscar.citiappdemo.presentation.presenter.GetClientNamePresenter;
 
 import javax.inject.Inject;
@@ -13,10 +15,12 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class MainActivity extends AppCompatActivity implements MainActivityView {
 
-    private static ProgressDialog progress;
+    private ProgressDialog progress;
+    private Unbinder unbinder;
 
     @Inject
     GetClientNamePresenter getClientNamePresenter;
@@ -27,7 +31,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        unbinder = ButterKnife.bind(this);
+        initializeInjector();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getClientNamePresenter.destroy();
+        unbinder.unbind();
     }
 
     @Override
@@ -47,6 +59,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     }
 
     @Override
+    public void showError(String error) {
+        progress = new ProgressDialog(this);
+        progress.setTitle("Error");
+        progress.setMessage(error);
+        progress.setCancelable(true); // disable dismiss by tapping outside of the dialog
+        progress.show();
+    }
+
+    @Override
     public void setClientName(String clientName) {
         textViewClientName.setText(clientName);
     }
@@ -55,5 +76,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     public void onButtonClick() {
         getClientNamePresenter.setView(this);
         getClientNamePresenter.getClientName();
+    }
+
+    private void initializeInjector() {
+        getApplicationComponent().inject(this);
+    }
+
+    private ApplicationComponent getApplicationComponent() {
+        return ((AndroidApplication) getApplication()).getApplicationComponent();
     }
 }
